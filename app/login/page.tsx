@@ -7,6 +7,7 @@ import { Button } from '@/app/components/ui/button'
 import { Input } from '@/app/components/ui/input'
 import { Label } from '@/app/components/ui/label'
 import { Card, CardContent, CardHeader } from '@/app/components/ui/card'
+import PageWrapper from '@/app/components/PageWrapper'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -39,42 +40,38 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen">
-      {/* Sidebar Platzhalter, gleiche Breite wie AdminLayout, immer sichtbar */}
-      <aside className="w-64 shrink-0" aria-hidden="true" />
-      <main className="flex-1 flex items-center justify-center bg-neutral-50 dark:bg-neutral-950 p-8 overflow-auto">
-        <Card className="w-full max-w-sm mx-auto shadow-xl">
-          <CardHeader>
-            <h1 className="text-xl font-semibold">Login</h1>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={onSubmit} className="space-y-3">
-              <div>
-                <Label>Email</Label>
-                <Input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <Label>Passwort</Label>
-                <Input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-              <Button disabled={loading} className="w-full">
-                {loading ? 'Anmelden…' : 'Login'}
-              </Button>
-              {error && <p className="text-red-600 text-sm">{error}</p>}
-            </form>
-          </CardContent>
-        </Card>
-      </main>
-    </div>
+    <PageWrapper className="flex items-center justify-center">
+      <Card className="w-full max-w-sm mx-auto shadow-xl">
+        <CardHeader>
+          <h1 className="text-xl font-semibold">Login</h1>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={onSubmit} className="space-y-3">
+            <div>
+              <Label>Email</Label>
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Label>Passwort</Label>
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            <Button disabled={loading} className="w-full">
+              {loading ? 'Anmelden…' : 'Login'}
+            </Button>
+            {error && <p className="text-red-600 text-sm">{error}</p>}
+          </form>
+        </CardContent>
+      </Card>
+    </PageWrapper>
   )
 }

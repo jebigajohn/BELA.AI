@@ -2,6 +2,7 @@ import { createServerClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Card, CardContent, CardHeader } from '@/app/components/ui/card'
 import { Button } from '@/app/components/ui/button'
+import AdminServicesClient from './AdminServicesClient'
 
 import Link from 'next/link'
 
@@ -77,7 +78,7 @@ export default async function AdminServicesPage() {
   const studioId = studioMember?.studio_id
   if (!studioId) {
     return (
-      <div className="max-w-3xl mx-auto py-10 px-4">
+      <AdminServicesClient>
         <Card>
           <CardHeader>
             <h1 className="text-2xl font-bold">Manage Services</h1>
@@ -90,7 +91,7 @@ export default async function AdminServicesPage() {
             </p>
           </CardContent>
         </Card>
-      </div>
+      </AdminServicesClient>
     )
   }
 
@@ -101,7 +102,7 @@ export default async function AdminServicesPage() {
     .order('name', { ascending: true })
 
   return (
-    <div className="max-w-3xl mx-auto py-10 px-4">
+    <AdminServicesClient>
       <Card>
         <CardHeader>
           <h1 className="text-2xl font-bold">Manage Services</h1>
@@ -117,7 +118,7 @@ export default async function AdminServicesPage() {
             {(services ?? []).map((s) => (
               <li
                 key={s.id}
-                className="border rounded p-4 flex items-center justify-between"
+                className="border rounded p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
               >
                 <div>
                   <div className="font-medium">{s.name}</div>
@@ -144,6 +145,6 @@ export default async function AdminServicesPage() {
           </ul>
         </CardContent>
       </Card>
-    </div>
+    </AdminServicesClient>
   )
 }

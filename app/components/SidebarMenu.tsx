@@ -33,21 +33,38 @@ export default function SidebarMenu({
         </summary>
         <div className="absolute left-0 bottom-10 min-w-40 bg-neutral-900 border border-neutral-700 rounded shadow-lg z-50 flex flex-col">
           {isAdmin && (
-            <Link
-              href="/admin/services"
-              className="px-4 py-2 hover:bg-neutral-800 text-left w-full text-sm"
-              onClick={(e) => {
-                let el = e.target as HTMLElement | null
-                while (el && el.tagName !== 'DETAILS') {
-                  el = el.parentElement
-                }
-                if (el && el.tagName === 'DETAILS') {
-                  ;(el as HTMLDetailsElement).open = false
-                }
-              }}
-            >
-              Manage Services
-            </Link>
+            <>
+              <Link
+                href="/admin/services"
+                className="px-4 py-2 hover:bg-neutral-800 text-left w-full text-sm"
+                onClick={(e) => {
+                  let el = e.target as HTMLElement | null
+                  while (el && el.tagName !== 'DETAILS') {
+                    el = el.parentElement
+                  }
+                  if (el && el.tagName === 'DETAILS') {
+                    ;(el as HTMLDetailsElement).open = false
+                  }
+                }}
+              >
+                Manage Services
+              </Link>
+              <Link
+                href="/admin/appointments"
+                className="px-4 py-2 hover:bg-neutral-800 text-left w-full text-sm"
+                onClick={(e) => {
+                  let el = e.target as HTMLElement | null
+                  while (el && el.tagName !== 'DETAILS') {
+                    el = el.parentElement
+                  }
+                  if (el && el.tagName === 'DETAILS') {
+                    ;(el as HTMLDetailsElement).open = false
+                  }
+                }}
+              >
+                Appointments
+              </Link>
+            </>
           )}
           <form action="/logout" method="get" className="w-full">
             <button
