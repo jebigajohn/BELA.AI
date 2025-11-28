@@ -32,13 +32,15 @@ export default function FormClient({ services }: { services: Service[] }) {
       })
       const json = await res.json().catch(() => null)
       if (res.ok && json?.success) {
-        setMessage(`Termin erfolgreich erstellt. ID: ${json.appointment_id}`)
+        setMessage(
+          `Appointment created successfully. ID: ${json.appointment_id}`
+        )
         form.reset()
       } else {
-        setError(json?.error || 'Fehler beim Erstellen des Termins')
+        setError(json?.error || 'Failed to create appointment')
       }
     } catch (err: any) {
-      setError(err?.message || 'Netzwerkfehler')
+      setError(err?.message || 'Network error')
     } finally {
       setLoading(false)
     }
@@ -46,7 +48,7 @@ export default function FormClient({ services }: { services: Service[] }) {
 
   return (
     <div className="mt-8">
-      <h2 className="text-lg font-semibold mb-3">Neuen Termin anlegen</h2>
+      <h2 className="text-lg font-semibold mb-3">Book a new appointment</h2>
       <form onSubmit={onSubmit} className="space-y-3">
         <div>
           <label className="block text-sm font-medium mb-1">Service</label>
@@ -55,7 +57,7 @@ export default function FormClient({ services }: { services: Service[] }) {
             className="w-full border rounded px-3 py-2"
             required
           >
-            <option value="">Bitte wählen</option>
+            <option value="">Please select</option>
             {services.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.name}
@@ -76,7 +78,7 @@ export default function FormClient({ services }: { services: Service[] }) {
             {/* Overlay button that opens the native picker via showPicker() */}
             <button
               type="button"
-              aria-label="Datum auswählen"
+              aria-label="Pick date"
               onClick={() => {
                 const el = dateInputRef.current
                 if (!el) return
@@ -109,25 +111,27 @@ export default function FormClient({ services }: { services: Service[] }) {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
-            <label className="block text-sm font-medium mb-1">Kundenname</label>
+            <label className="block text-sm font-medium mb-1">
+              Customer name
+            </label>
             <input
               name="customer_name"
               className="w-full border rounded px-3 py-2"
-              placeholder="Vorname Nachname"
+              placeholder="First Last"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">E-Mail</label>
+            <label className="block text-sm font-medium mb-1">E-mail</label>
             <input
               name="customer_email"
               type="email"
               className="w-full border rounded px-3 py-2"
-              placeholder="kunde@example.com"
+              placeholder="customer@example.com"
             />
           </div>
         </div>
         <Button disabled={loading} type="submit">
-          {loading ? 'Erstelle...' : 'Create appointment'}
+          {loading ? 'Creating...' : 'Create appointment'}
         </Button>
       </form>
       {message && <p className="mt-3 text-green-600">{message}</p>}

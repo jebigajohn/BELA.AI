@@ -1,0 +1,17 @@
+# Speckit configuration (lightweight)
+# This file describes where specs live and how tasks should be extracted.
+version: 1
+repo: jebigajohn/BELA.AI
+specs:
+  dir: specs
+  include: '**/*.md'
+  task_section: 'Tasks' # Section heading used to extract tasks
+  labels:
+    - spec
+issues:
+  spec_label: spec
+  default_labels:
+    - backlog
+  task_label: task
+  title_template: '[Spec] {{ title }}'
+  task_title_template: '{{ checkbox_text }}'

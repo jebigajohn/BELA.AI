@@ -38,12 +38,15 @@ export default async function Header() {
                 Customers
               </Link>
               <ThemeToggle />
-              <Link
-                href="/logout"
+              <button
+                type="button"
                 className="rounded-md border px-3 py-1.5 text-sm hover:bg-foreground/5 transition-colors"
+                onClick={() => {
+                  window.location.href = '/logout'
+                }}
               >
                 Logout
-              </Link>
+              </button>
             </>
           ) : (
             <>
@@ -101,12 +104,15 @@ export default async function Header() {
                 <div className="px-2 py-1.5">
                   <ThemeToggle />
                 </div>
-                <Link
-                  href="/logout"
-                  className="px-3 py-2 rounded border hover:bg-foreground/5"
+                <button
+                  type="button"
+                  className="px-3 py-2 rounded border hover:bg-foreground/5 w-full text-left"
+                  onClick={() => {
+                    window.location.href = '/logout'
+                  }}
                 >
                   Logout
-                </Link>
+                </button>
               </>
             ) : (
               <>

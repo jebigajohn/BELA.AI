@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
-import Header from './components/Header'
+import Sidebar from './components/Sidebar'
+import ThemeToggle from './components/ThemeToggle'
 import { Providers } from './providers'
 
 const geistSans = Geist({
@@ -35,8 +36,16 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <Providers>
-          <Header />
-          {children}
+          <div className="flex min-h-screen">
+            <Sidebar />
+            <main className="flex-1 bg-neutral-50 dark:bg-neutral-950 overflow-auto relative">
+              {children}
+              {/* Floating ThemeToggle Button, weiter links */}
+              <div className="fixed bottom-6 right-3 z-50">
+                <ThemeToggle />
+              </div>
+            </main>
+          </div>
         </Providers>
       </body>
     </html>

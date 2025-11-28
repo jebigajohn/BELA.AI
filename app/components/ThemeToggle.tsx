@@ -31,7 +31,11 @@ function MoonIcon(props: React.SVGProps<SVGSVGElement>) {
   )
 }
 
-export default function ThemeToggle() {
+export default function ThemeToggle({
+  className = '',
+}: {
+  className?: string
+}) {
   const { resolvedTheme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
@@ -45,14 +49,14 @@ export default function ThemeToggle() {
     <button
       type="button"
       onClick={() => setTheme(next)}
-      className="rounded-md border px-2.5 py-1.5 text-sm hover:bg-foreground/5 transition-colors inline-flex items-center gap-2"
+      className={`rounded-full w-10 h-10 border bg-background text-foreground hover:bg-foreground/5 transition-colors inline-flex items-center justify-center shadow ${className}`}
       aria-label="Toggle theme"
       title={`Switch to ${next} mode`}
     >
       {isDark ? (
-        <SunIcon className="h-4 w-4" />
+        <SunIcon className="h-5 w-5" />
       ) : (
-        <MoonIcon className="h-4 w-4" />
+        <MoonIcon className="h-5 w-5" />
       )}
       <span className="sr-only">Toggle theme</span>
     </button>

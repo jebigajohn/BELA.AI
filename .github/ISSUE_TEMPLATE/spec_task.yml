@@ -1,0 +1,35 @@
+name: Task from Spec
+description: Create a task derived from a spec item
+labels: [task]
+body:
+  - type: input
+    id: spec
+    attributes:
+      label: Spec Path
+      description: Relative path to the spec file (e.g., specs/00_mvp_core.md)
+      placeholder: specs/00_mvp_core.md
+    validations:
+      required: true
+  - type: input
+    id: title
+    attributes:
+      label: Task Title
+      description: Short imperative title
+      placeholder: Build services editor
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: Acceptance criteria, notes, links
+  - type: dropdown
+    id: labels
+    attributes:
+      label: Extra Labels
+      multiple: true
+      options:
+        - mvp
+        - spec
+        - appointments
+        - ui
