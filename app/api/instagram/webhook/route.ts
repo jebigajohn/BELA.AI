@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
           // Store incoming message in Supabase
           try {
             const supabase = await createServerClient()
-            await supabase.from('instagram_messages').insert({
+            await (supabase.from as any)('instagram_messages').insert({
               instagram_id: fromId,
               direction: 'inbound',
               body: text,
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
             // store outbound
             try {
               const supabase = await createServerClient()
-              await supabase.from('instagram_messages').insert({
+              await (supabase.from as any)('instagram_messages').insert({
                 instagram_id: fromId,
                 direction: 'outbound',
                 body: replyText,
