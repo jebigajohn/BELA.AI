@@ -55,7 +55,7 @@ RLS-enforced per studio, typed Supabase client, and a small but consistent UI la
 ## Tasks
 
 - [ x ] Add Services editor (admin-only): list/create/update/delete
-- [ ] Add Appointments list with basic filters (date, staff)
+- [ x ] Add Appointments list with basic filters (date, staff)
 - [ ] Validate booking against staff_working_hours + time_off (at least no obvious conflicts)
 - [ ] Improve error toasts and form validation (forms, API errors, RLS feedback)
 - [ ] Seed demo data command (npm script) – nutzt bestehende Seed-Migration als Referenz

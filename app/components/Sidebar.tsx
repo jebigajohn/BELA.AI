@@ -5,9 +5,15 @@ import SidebarClient from './SidebarClient'
 export default async function Sidebar() {
   noStore()
   const supabase = await createServerClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  let user = null
+  try {
+    const {
+      data: { user: profile },
+    } = await supabase.auth.getUser()
+    user = profile
+  } catch (error) {
+    console.warn('Supabase auth.getUser failed, ignoring', error)
+  }
 
   // Check admin role for current user
   let isAdmin = false

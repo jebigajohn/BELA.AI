@@ -13,6 +13,7 @@ import {
   User,
   Menu,
   X,
+  Sparkles,
 } from 'lucide-react'
 import { useSidebar } from './SidebarContext'
 
@@ -35,6 +36,11 @@ const navItems: NavItem[] = [
     label: 'Customers',
     icon: <Users size={20} />,
     requiresLogin: true,
+  },
+  {
+    href: '/demo/ai-dm',
+    label: 'AI DM Demo',
+    icon: <Sparkles size={20} />,
   },
   {
     href: '/admin/staff',

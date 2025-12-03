@@ -11,9 +11,15 @@ export default async function Header() {
   // Ensure fresh auth state on each render
   noStore()
   const supabase = await createServerClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  let user = null
+  try {
+    const {
+      data: { user: profile },
+    } = await supabase.auth.getUser()
+    user = profile
+  } catch (error) {
+    console.warn('Supabase auth.getUser failed, ignoring', error)
+  }
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/70 backdrop-blur supports-backdrop-filter:bg-background/60">
