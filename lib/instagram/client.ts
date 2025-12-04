@@ -1,8 +1,10 @@
 import fetch from 'node-fetch'
+import crypto from 'crypto'
 
 // Instagram Graph API für Messaging
 const IG_ACCESS_TOKEN = process.env.IG_ACCESS_TOKEN
 const INSTAGRAM_USER_ID = process.env.INSTAGRAM_USER_ID
+const FB_APP_SECRET = process.env.FB_APP_SECRET
 const IG_API_BASE = 'https://graph.instagram.com/v21.0'
 
 if (!IG_ACCESS_TOKEN) {
@@ -39,7 +41,36 @@ export async function sendInstagramReply(
   return data
 }
 
-export function verifyHubSignature(_payload: string, _signature: string) {
-  // Signature verification placeholder — implement HMAC verification if needed
-  return true
+export function verifyHubSignature(
+  payload: string,
+  signature: string
+): boolean {
+  if (!FB_APP_SECRET) {
+    console.warn('FB_APP_SECRET not set — skipping signature verification')
+    return false
+  }
+
+  if (!signature) {
+    console.warn('No signature provided')
+    return false
+  }
+
+  // Meta sendet die Signatur als "sha256=XXXXX"
+  const signatureParts = signature.split('=')
+  if (signatureParts.length !== 2 || signatureParts[0] !== 'sha256') {
+    console.warn('Invalid signature format')
+    return false
+  }
+
+  const expectedSignature = signatureParts[1]
+  const computedSignature = crypto
+    .createHmac('sha256', FB_APP_SECRET)
+    .update(payload)
+    .digest('hex')
+
+  // Timing-safe comparison to prevent timing attacks
+  return crypto.timingSafeEqual(
+    Buffer.from(expectedSignature),
+    Buffer.from(computedSignature)
+  )
 }

@@ -22,7 +22,17 @@ export async function GET(request: NextRequest) {
 // POST for incoming events
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    // Hole den Raw-Body für Signaturprüfung
+    const rawBody = await request.text()
+    const signature = request.headers.get('x-hub-signature-256') || ''
+
+    // Verifiziere die Signatur von Meta
+    if (!verifyHubSignature(rawBody, signature)) {
+      console.warn('Invalid webhook signature - rejecting request')
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
+    }
+
+    const body = JSON.parse(rawBody)
 
     // Minimal validation
     if (!body || !body.entry)
