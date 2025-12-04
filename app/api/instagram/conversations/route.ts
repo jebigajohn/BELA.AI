@@ -1,63 +1,74 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
+import { createServerClient } from '@/lib/supabase/server'
 
-const IG_API_BASE = 'https://graph.facebook.com/v21.0'
+export interface Conversation {
+  instagram_id: string
+  last_message: string
+  last_message_at: string
+  unread_count: number
+  messages: Message[]
+}
 
-// GET - Fetch Instagram conversations/DMs
-export async function GET(request: NextRequest) {
-  const accessToken = process.env.FB_PAGE_ACCESS_TOKEN
-  const igUserId = process.env.INSTAGRAM_USER_ID
+export interface Message {
+  id: number
+  instagram_id: string
+  direction: 'inbound' | 'outbound'
+  body: string | null
+  created_at: string
+  raw: any
+}
 
-  if (!accessToken) {
-    return NextResponse.json(
-      { error: 'Missing FB_PAGE_ACCESS_TOKEN' },
-      { status: 500 }
-    )
-  }
-
-  if (!igUserId) {
-    return NextResponse.json(
-      { error: 'Missing INSTAGRAM_USER_ID - set it in .env.local' },
-      { status: 500 }
-    )
-  }
-
+// GET /api/instagram/conversations - Alle Conversations aus Supabase abrufen
+export async function GET() {
   try {
-    // Fetch conversations
-    const conversationsUrl = `${IG_API_BASE}/${igUserId}/conversations?platform=instagram&access_token=${accessToken}`
+    const supabase = await createServerClient()
 
-    const res = await fetch(conversationsUrl)
-    const data = await res.json()
+    // Alle Messages holen, nach Datum sortiert
+    const { data: messages, error } = await supabase
+      .from('instagram_messages')
+      .select('*')
+      .order('created_at', { ascending: true })
 
-    if (data.error) {
-      console.error('Instagram API error:', data.error)
-      return NextResponse.json(
-        { error: data.error.message, code: data.error.code },
-        { status: 400 }
-      )
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    // For each conversation, fetch messages
-    const conversationsWithMessages = await Promise.all(
-      (data.data || []).map(async (conv: any) => {
-        const messagesUrl = `${IG_API_BASE}/${conv.id}?fields=messages{message,from,created_time}&access_token=${accessToken}`
-        const msgRes = await fetch(messagesUrl)
-        const msgData = await msgRes.json()
+    // Gruppiere nach instagram_id
+    const conversationsMap = new Map<string, Conversation>()
 
-        return {
-          ...conv,
-          messages: msgData.messages?.data || [],
+    for (const msg of messages || []) {
+      const existing = conversationsMap.get(msg.instagram_id)
+
+      if (existing) {
+        existing.messages.push(msg as Message)
+        existing.last_message = msg.body || ''
+        existing.last_message_at = msg.created_at
+        if (msg.direction === 'inbound') {
+          existing.unread_count++
         }
-      })
+      } else {
+        conversationsMap.set(msg.instagram_id, {
+          instagram_id: msg.instagram_id,
+          last_message: msg.body || '',
+          last_message_at: msg.created_at,
+          unread_count: msg.direction === 'inbound' ? 1 : 0,
+          messages: [msg as Message],
+        })
+      }
+    }
+
+    // Sortiere Conversations nach letzter Nachricht (neueste zuerst)
+    const conversations = Array.from(conversationsMap.values()).sort(
+      (a, b) =>
+        new Date(b.last_message_at).getTime() -
+        new Date(a.last_message_at).getTime()
     )
 
-    return NextResponse.json({
-      conversations: conversationsWithMessages,
-      raw: data,
-    })
-  } catch (error) {
-    console.error('Error fetching conversations:', error)
+    return NextResponse.json({ conversations })
+  } catch (err) {
+    console.error('Error fetching conversations:', err)
     return NextResponse.json(
-      { error: 'Failed to fetch conversations', details: String(error) },
+      { error: 'Failed to fetch conversations' },
       { status: 500 }
     )
   }
