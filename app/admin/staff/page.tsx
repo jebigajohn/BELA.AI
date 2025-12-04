@@ -14,5 +14,16 @@ export default async function StaffPage() {
     redirect('/login?redirect=/admin/staff')
   }
 
+  // Check if user is admin
+  const { data: member } = await supabase
+    .from('studio_members')
+    .select('role')
+    .eq('profile_id', user.id)
+    .maybeSingle()
+
+  if (member?.role !== 'admin') {
+    redirect('/demo/services')
+  }
+
   return <StaffManager />
 }

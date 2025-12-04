@@ -35,7 +35,7 @@ const navItems: NavItem[] = [
     href: '/demo/customers',
     label: 'Customers',
     icon: <Users size={20} />,
-    requiresLogin: true,
+    adminOnly: true,
   },
   {
     href: '/demo/ai-dm',
@@ -47,7 +47,7 @@ const navItems: NavItem[] = [
     href: '/admin/staff',
     label: 'Staff',
     icon: <UserCog size={20} />,
-    requiresLogin: true,
+    adminOnly: true,
   },
   {
     href: '/admin/appointments',
