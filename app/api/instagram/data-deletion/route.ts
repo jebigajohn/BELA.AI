@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
+import { createServerClient } from '@/lib/supabase/server'
 
 // Data Deletion Request Callback - GDPR requirement
 // Called when user requests deletion of their data
@@ -35,22 +36,31 @@ export async function POST(request: NextRequest) {
     }
 
     const userId = data.user_id
-
-    // TODO: Delete user's data from your database
-    // - Remove instagram_messages for this user
-    // - Remove any stored tokens
-    // - Remove any other personal data
     console.log('Data deletion requested for user:', userId)
+
+    // Delete user's data from database
+    const supabase = await createServerClient()
+    
+    // Delete all messages from/to this user
+    const { error: deleteError } = await supabase
+      .from('instagram_messages')
+      .delete()
+      .eq('instagram_id', userId)
+    
+    if (deleteError) {
+      console.error('Error deleting user data:', deleteError)
+    } else {
+      console.log('Successfully deleted data for user:', userId)
+    }
 
     // Generate a confirmation code for the user to check status
     const confirmationCode = crypto.randomUUID()
 
     // Facebook expects this specific response format
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://bela-ai-kappa.vercel.app'
+    
     return NextResponse.json({
-      url: `${
-        process.env.NEXT_PUBLIC_APP_URL ||
-        'https://gwenda-pavonine-pensionably.ngrok-free.dev'
-      }/data-deletion-status?code=${confirmationCode}`,
+      url: `${appUrl}/data-deletion-status?code=${confirmationCode}`,
       confirmation_code: confirmationCode,
     })
   } catch (error) {
