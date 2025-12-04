@@ -31,10 +31,9 @@ export async function POST(request: NextRequest) {
           (ai as any).answer || (ai as any).response || JSON.stringify(ai)
       } catch (err) {
         console.error('AI generation failed:', err)
-        return NextResponse.json(
-          { error: 'AI generation failed' },
-          { status: 500 }
-        )
+        // Fallback: Sende die originale Nachricht wenn AI fehlschlägt
+        console.log('Falling back to original message')
+        messageToSend = body.message
       }
     }
 
