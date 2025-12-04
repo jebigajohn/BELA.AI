@@ -49,56 +49,40 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: false }, { status: 400 })
     }
 
-    // For each entry/changes, look for messages
+    // For each entry, look for messages
+    // Instagram uses different structures depending on webhook type:
+    // - "changes" array with "field": "messages" and "value" containing message data
+    // - "messaging" array directly on entry
     for (const entry of body.entry || []) {
+      console.log('📬 Processing entry:', JSON.stringify(entry, null, 2))
+      
+      // Handle "changes" structure (Instagram API)
       for (const change of entry.changes || []) {
+        console.log('🔄 Processing change:', change.field)
         const value = change.value
         if (!value) continue
 
-        // Example path: messaging -> messages
-        const messages = value.messaging || value.messages || []
-
-        for (const msg of messages) {
-          const fromId = msg.from || msg.sender?.id || msg.sender_id
-          const text = msg.message?.text || msg.text || msg.body
-
-          // Store incoming message in Supabase
-          try {
-            const supabase = await createServerClient()
-            await (supabase.from as any)('instagram_messages').insert({
-              instagram_id: fromId,
-              direction: 'inbound',
-              body: text,
-              raw: msg,
-            })
-          } catch (e) {
-            console.warn('Supabase insert failed', e)
-          }
-
-          // Generate reply via AI
-          try {
-            const ai = await generateDMResponse(text)
-            const replyText =
-              (ai as any).answer || (ai as any).response || JSON.stringify(ai)
-            // send reply
-            await sendInstagramReply(fromId, replyText)
-
-            // store outbound
-            try {
-              const supabase = await createServerClient()
-              await (supabase.from as any)('instagram_messages').insert({
-                instagram_id: fromId,
-                direction: 'outbound',
-                body: replyText,
-                raw: ai,
-              })
-            } catch (e) {
-              console.warn('Supabase insert failed', e)
-            }
-          } catch (e) {
-            console.error('AI reply/send failed', e)
-          }
+        // The message is directly in value for Instagram
+        if (change.field === 'messages' && value.message) {
+          const fromId = value.sender?.id || 'unknown'
+          const text = value.message?.text || ''
+          
+          console.log(`💬 Message from ${fromId}: ${text}`)
+          
+          // Store incoming message
+          await storeAndReply(fromId, text, value)
         }
+      }
+      
+      // Handle "messaging" structure (Messenger-style)
+      for (const msg of entry.messaging || []) {
+        const fromId = msg.sender?.id || msg.from || 'unknown'
+        const text = msg.message?.text || msg.text || ''
+        
+        console.log(`💬 Messaging from ${fromId}: ${text}`)
+        
+        // Store incoming message
+        await storeAndReply(fromId, text, msg)
       }
     }
 
@@ -106,5 +90,59 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     console.error('Webhook handling error', err)
     return NextResponse.json({ ok: false, error: String(err) }, { status: 500 })
+  }
+}
+
+// Helper function to store message and send AI reply
+async function storeAndReply(fromId: string, text: string, rawMsg: unknown) {
+  if (!text) {
+    console.log('⚠️ Empty message, skipping')
+    return
+  }
+  
+  // Store incoming message in Supabase
+  try {
+    const supabase = await createServerClient()
+    const { error } = await supabase.from('instagram_messages').insert({
+      instagram_id: fromId,
+      direction: 'inbound',
+      body: text,
+      raw: rawMsg,
+    })
+    if (error) {
+      console.error('❌ Supabase insert error:', error)
+    } else {
+      console.log('✅ Message stored in Supabase')
+    }
+  } catch (e) {
+    console.error('❌ Supabase insert failed', e)
+  }
+
+  // Generate reply via AI
+  try {
+    const ai = await generateDMResponse(text)
+    const replyText =
+      (ai as any).answer || (ai as any).response || JSON.stringify(ai)
+    console.log('🤖 AI response:', replyText)
+    
+    // Send reply to Instagram
+    await sendInstagramReply(fromId, replyText)
+    console.log('📤 Reply sent to Instagram')
+
+    // Store outbound message
+    try {
+      const supabase = await createServerClient()
+      await supabase.from('instagram_messages').insert({
+        instagram_id: fromId,
+        direction: 'outbound',
+        body: replyText,
+        raw: ai,
+      })
+      console.log('✅ Outbound message stored')
+    } catch (e) {
+      console.error('❌ Outbound store failed', e)
+    }
+  } catch (e) {
+    console.error('❌ AI reply/send failed', e)
   }
 }
