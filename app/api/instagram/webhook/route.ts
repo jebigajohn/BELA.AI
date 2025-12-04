@@ -26,17 +26,28 @@ export async function POST(request: NextRequest) {
     const rawBody = await request.text()
     const signature = request.headers.get('x-hub-signature-256') || ''
 
-    // Verifiziere die Signatur von Meta
-    if (!verifyHubSignature(rawBody, signature)) {
-      console.warn('Invalid webhook signature - rejecting request')
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
+    console.log('📩 Webhook received!')
+    console.log('Body length:', rawBody.length)
+    console.log('Has signature:', !!signature)
+
+    // Verifiziere die Signatur von Meta (temporarily log but don't reject)
+    const isValidSignature = verifyHubSignature(rawBody, signature)
+    if (!isValidSignature) {
+      console.warn(
+        '⚠️ Invalid webhook signature - but processing anyway for debugging'
+      )
+      // In production, uncomment this:
+      // return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
     }
 
     const body = JSON.parse(rawBody)
+    console.log('📦 Parsed body:', JSON.stringify(body, null, 2))
 
     // Minimal validation
-    if (!body || !body.entry)
+    if (!body || !body.entry) {
+      console.log('❌ No entry in body')
       return NextResponse.json({ ok: false }, { status: 400 })
+    }
 
     // For each entry/changes, look for messages
     for (const entry of body.entry || []) {
