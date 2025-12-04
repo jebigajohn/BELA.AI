@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Helper function to store message and send AI reply
+// Helper function to store message (auto-reply disabled)
 async function storeAndReply(fromId: string, text: string, rawMsg: Json) {
   if (!text) {
     console.log('⚠️ Empty message, skipping')
@@ -119,7 +119,8 @@ async function storeAndReply(fromId: string, text: string, rawMsg: Json) {
     console.error('❌ Supabase insert failed', e)
   }
 
-  // Generate reply via AI
+  // AUTO-REPLY DISABLED - uncomment to enable AI responses
+  /*
   try {
     const ai = await generateDMResponse(text)
     const replyText =
@@ -146,4 +147,5 @@ async function storeAndReply(fromId: string, text: string, rawMsg: Json) {
   } catch (e) {
     console.error('❌ AI reply/send failed', e)
   }
+  */
 }
