@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.5"
+    PostgrestVersion: '13.0.5'
   }
   public: {
     Tables: {
@@ -38,12 +38,12 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "ai_prompts_studio_fk"
-            columns: ["studio_id"]
+            foreignKeyName: 'ai_prompts_studio_fk'
+            columns: ['studio_id']
             isOneToOne: false
-            referencedRelation: "studios"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'studios'
+            referencedColumns: ['id']
+          }
         ]
       }
       ai_suggestions: {
@@ -79,19 +79,19 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "ai_suggestions_appointment_fk"
-            columns: ["studio_id", "appointment_id"]
+            foreignKeyName: 'ai_suggestions_appointment_fk'
+            columns: ['studio_id', 'appointment_id']
             isOneToOne: false
-            referencedRelation: "appointments"
-            referencedColumns: ["studio_id", "id"]
+            referencedRelation: 'appointments'
+            referencedColumns: ['studio_id', 'id']
           },
           {
-            foreignKeyName: "ai_suggestions_message_fk"
-            columns: ["studio_id", "message_id"]
+            foreignKeyName: 'ai_suggestions_message_fk'
+            columns: ['studio_id', 'message_id']
             isOneToOne: false
-            referencedRelation: "messages"
-            referencedColumns: ["studio_id", "id"]
-          },
+            referencedRelation: 'messages'
+            referencedColumns: ['studio_id', 'id']
+          }
         ]
       }
       appointments: {
@@ -108,7 +108,7 @@ export type Database = {
           source: string | null
           staff_id: string
           starts_at: string
-          status: Database["public"]["Enums"]["appointment_status"]
+          status: Database['public']['Enums']['appointment_status']
           studio_id: string
         }
         Insert: {
@@ -124,7 +124,7 @@ export type Database = {
           source?: string | null
           staff_id: string
           starts_at: string
-          status?: Database["public"]["Enums"]["appointment_status"]
+          status?: Database['public']['Enums']['appointment_status']
           studio_id: string
         }
         Update: {
@@ -140,45 +140,45 @@ export type Database = {
           source?: string | null
           staff_id?: string
           starts_at?: string
-          status?: Database["public"]["Enums"]["appointment_status"]
+          status?: Database['public']['Enums']['appointment_status']
           studio_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "appointments_created_by_fk"
-            columns: ["created_by"]
+            foreignKeyName: 'appointments_created_by_fk'
+            columns: ['created_by']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "appointments_customer_fk"
-            columns: ["studio_id", "customer_id"]
+            foreignKeyName: 'appointments_customer_fk'
+            columns: ['studio_id', 'customer_id']
             isOneToOne: false
-            referencedRelation: "customers"
-            referencedColumns: ["studio_id", "id"]
+            referencedRelation: 'customers'
+            referencedColumns: ['studio_id', 'id']
           },
           {
-            foreignKeyName: "appointments_rescheduled_from_fk"
-            columns: ["studio_id", "rescheduled_from_id"]
+            foreignKeyName: 'appointments_rescheduled_from_fk'
+            columns: ['studio_id', 'rescheduled_from_id']
             isOneToOne: false
-            referencedRelation: "appointments"
-            referencedColumns: ["studio_id", "id"]
+            referencedRelation: 'appointments'
+            referencedColumns: ['studio_id', 'id']
           },
           {
-            foreignKeyName: "appointments_service_fk"
-            columns: ["studio_id", "service_id"]
+            foreignKeyName: 'appointments_service_fk'
+            columns: ['studio_id', 'service_id']
             isOneToOne: false
-            referencedRelation: "services"
-            referencedColumns: ["studio_id", "id"]
+            referencedRelation: 'services'
+            referencedColumns: ['studio_id', 'id']
           },
           {
-            foreignKeyName: "appointments_staff_fk"
-            columns: ["studio_id", "staff_id"]
+            foreignKeyName: 'appointments_staff_fk'
+            columns: ['studio_id', 'staff_id']
             isOneToOne: false
-            referencedRelation: "staff"
-            referencedColumns: ["studio_id", "id"]
-          },
+            referencedRelation: 'staff'
+            referencedColumns: ['studio_id', 'id']
+          }
         ]
       }
       audit_logs: {
@@ -220,19 +220,19 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "audit_logs_actor_profile_fk"
-            columns: ["actor_profile_id"]
+            foreignKeyName: 'audit_logs_actor_profile_fk'
+            columns: ['actor_profile_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "audit_logs_studio_fk"
-            columns: ["studio_id"]
+            foreignKeyName: 'audit_logs_studio_fk'
+            columns: ['studio_id']
             isOneToOne: false
-            referencedRelation: "studios"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'studios'
+            referencedColumns: ['id']
+          }
         ]
       }
       customers: {
@@ -271,13 +271,40 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "customers_studio_fk"
-            columns: ["studio_id"]
+            foreignKeyName: 'customers_studio_fk'
+            columns: ['studio_id']
             isOneToOne: false
-            referencedRelation: "studios"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'studios'
+            referencedColumns: ['id']
+          }
         ]
+      }
+      instagram_messages: {
+        Row: {
+          id: number
+          instagram_id: string
+          direction: string
+          body: string | null
+          raw: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: number
+          instagram_id: string
+          direction: string
+          body?: string | null
+          raw?: Json | null
+          created_at?: string
+        }
+        Update: {
+          id?: number
+          instagram_id?: string
+          direction?: string
+          body?: string | null
+          raw?: Json | null
+          created_at?: string
+        }
+        Relationships: []
       }
       locations: {
         Row: {
@@ -303,50 +330,50 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "locations_studio_fk"
-            columns: ["studio_id"]
+            foreignKeyName: 'locations_studio_fk'
+            columns: ['studio_id']
             isOneToOne: false
-            referencedRelation: "studios"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'studios'
+            referencedColumns: ['id']
+          }
         ]
       }
       message_threads: {
         Row: {
-          channel: Database["public"]["Enums"]["channel"]
+          channel: Database['public']['Enums']['channel']
           customer_id: string
           external_ref: string | null
           id: string
           last_message_at: string | null
-          status: Database["public"]["Enums"]["thread_status"]
+          status: Database['public']['Enums']['thread_status']
           studio_id: string
         }
         Insert: {
-          channel: Database["public"]["Enums"]["channel"]
+          channel: Database['public']['Enums']['channel']
           customer_id: string
           external_ref?: string | null
           id: string
           last_message_at?: string | null
-          status?: Database["public"]["Enums"]["thread_status"]
+          status?: Database['public']['Enums']['thread_status']
           studio_id: string
         }
         Update: {
-          channel?: Database["public"]["Enums"]["channel"]
+          channel?: Database['public']['Enums']['channel']
           customer_id?: string
           external_ref?: string | null
           id?: string
           last_message_at?: string | null
-          status?: Database["public"]["Enums"]["thread_status"]
+          status?: Database['public']['Enums']['thread_status']
           studio_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "message_threads_customer_fk"
-            columns: ["studio_id", "customer_id"]
+            foreignKeyName: 'message_threads_customer_fk'
+            columns: ['studio_id', 'customer_id']
             isOneToOne: false
-            referencedRelation: "customers"
-            referencedColumns: ["studio_id", "id"]
-          },
+            referencedRelation: 'customers'
+            referencedColumns: ['studio_id', 'id']
+          }
         ]
       }
       messages: {
@@ -356,7 +383,7 @@ export type Database = {
           id: string
           read_at: string | null
           sender_profile_id: string | null
-          sender_type: Database["public"]["Enums"]["message_sender"]
+          sender_type: Database['public']['Enums']['message_sender']
           sent_at: string
           studio_id: string
           thread_id: string
@@ -367,7 +394,7 @@ export type Database = {
           id: string
           read_at?: string | null
           sender_profile_id?: string | null
-          sender_type: Database["public"]["Enums"]["message_sender"]
+          sender_type: Database['public']['Enums']['message_sender']
           sent_at?: string
           studio_id: string
           thread_id: string
@@ -378,26 +405,26 @@ export type Database = {
           id?: string
           read_at?: string | null
           sender_profile_id?: string | null
-          sender_type?: Database["public"]["Enums"]["message_sender"]
+          sender_type?: Database['public']['Enums']['message_sender']
           sent_at?: string
           studio_id?: string
           thread_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "messages_sender_profile_fk"
-            columns: ["sender_profile_id"]
+            foreignKeyName: 'messages_sender_profile_fk'
+            columns: ['sender_profile_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "messages_thread_fk"
-            columns: ["studio_id", "thread_id"]
+            foreignKeyName: 'messages_thread_fk'
+            columns: ['studio_id', 'thread_id']
             isOneToOne: false
-            referencedRelation: "message_threads"
-            referencedColumns: ["studio_id", "id"]
-          },
+            referencedRelation: 'message_threads'
+            referencedColumns: ['studio_id', 'id']
+          }
         ]
       }
       profiles: {
@@ -427,12 +454,12 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "profiles_default_studio_fk"
-            columns: ["default_studio_id"]
+            foreignKeyName: 'profiles_default_studio_fk'
+            columns: ['default_studio_id']
             isOneToOne: false
-            referencedRelation: "studios"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'studios'
+            referencedColumns: ['id']
+          }
         ]
       }
       services: {
@@ -480,12 +507,12 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "services_studio_fk"
-            columns: ["studio_id"]
+            foreignKeyName: 'services_studio_fk'
+            columns: ['studio_id']
             isOneToOne: false
-            referencedRelation: "studios"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'studios'
+            referencedColumns: ['id']
+          }
         ]
       }
       staff: {
@@ -518,19 +545,19 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "staff_profile_fk"
-            columns: ["profile_id"]
+            foreignKeyName: 'staff_profile_fk'
+            columns: ['profile_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "staff_studio_fk"
-            columns: ["studio_id"]
+            foreignKeyName: 'staff_studio_fk'
+            columns: ['studio_id']
             isOneToOne: false
-            referencedRelation: "studios"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'studios'
+            referencedColumns: ['id']
+          }
         ]
       }
       staff_services: {
@@ -560,19 +587,19 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "staff_services_service_fk"
-            columns: ["studio_id", "service_id"]
+            foreignKeyName: 'staff_services_service_fk'
+            columns: ['studio_id', 'service_id']
             isOneToOne: false
-            referencedRelation: "services"
-            referencedColumns: ["studio_id", "id"]
+            referencedRelation: 'services'
+            referencedColumns: ['studio_id', 'id']
           },
           {
-            foreignKeyName: "staff_services_staff_fk"
-            columns: ["studio_id", "staff_id"]
+            foreignKeyName: 'staff_services_staff_fk'
+            columns: ['studio_id', 'staff_id']
             isOneToOne: false
-            referencedRelation: "staff"
-            referencedColumns: ["studio_id", "id"]
-          },
+            referencedRelation: 'staff'
+            referencedColumns: ['studio_id', 'id']
+          }
         ]
       }
       staff_time_off: {
@@ -602,12 +629,12 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "staff_time_off_staff_fk"
-            columns: ["studio_id", "staff_id"]
+            foreignKeyName: 'staff_time_off_staff_fk'
+            columns: ['studio_id', 'staff_id']
             isOneToOne: false
-            referencedRelation: "staff"
-            referencedColumns: ["studio_id", "id"]
-          },
+            referencedRelation: 'staff'
+            referencedColumns: ['studio_id', 'id']
+          }
         ]
       }
       staff_working_hours: {
@@ -640,19 +667,19 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "staff_working_hours_location_fk"
-            columns: ["studio_id", "location_id"]
+            foreignKeyName: 'staff_working_hours_location_fk'
+            columns: ['studio_id', 'location_id']
             isOneToOne: false
-            referencedRelation: "locations"
-            referencedColumns: ["studio_id", "id"]
+            referencedRelation: 'locations'
+            referencedColumns: ['studio_id', 'id']
           },
           {
-            foreignKeyName: "staff_working_hours_staff_fk"
-            columns: ["studio_id", "staff_id"]
+            foreignKeyName: 'staff_working_hours_staff_fk'
+            columns: ['studio_id', 'staff_id']
             isOneToOne: false
-            referencedRelation: "staff"
-            referencedColumns: ["studio_id", "id"]
-          },
+            referencedRelation: 'staff'
+            referencedColumns: ['studio_id', 'id']
+          }
         ]
       }
       studio_hours: {
@@ -679,12 +706,12 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "studio_hours_studio_fk"
-            columns: ["studio_id"]
+            foreignKeyName: 'studio_hours_studio_fk'
+            columns: ['studio_id']
             isOneToOne: false
-            referencedRelation: "studios"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'studios'
+            referencedColumns: ['id']
+          }
         ]
       }
       studio_members: {
@@ -692,7 +719,7 @@ export type Database = {
           is_active: boolean
           joined_at: string
           profile_id: string
-          role: Database["public"]["Enums"]["member_role"]
+          role: Database['public']['Enums']['member_role']
           studio_id: string
           title: string | null
         }
@@ -700,7 +727,7 @@ export type Database = {
           is_active?: boolean
           joined_at?: string
           profile_id: string
-          role: Database["public"]["Enums"]["member_role"]
+          role: Database['public']['Enums']['member_role']
           studio_id: string
           title?: string | null
         }
@@ -708,25 +735,25 @@ export type Database = {
           is_active?: boolean
           joined_at?: string
           profile_id?: string
-          role?: Database["public"]["Enums"]["member_role"]
+          role?: Database['public']['Enums']['member_role']
           studio_id?: string
           title?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "studio_members_profile_fk"
-            columns: ["profile_id"]
+            foreignKeyName: 'studio_members_profile_fk'
+            columns: ['profile_id']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "studio_members_studio_fk"
-            columns: ["studio_id"]
+            foreignKeyName: 'studio_members_studio_fk'
+            columns: ['studio_id']
             isOneToOne: false
-            referencedRelation: "studios"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'studios'
+            referencedColumns: ['id']
+          }
         ]
       }
       studios: {
@@ -759,12 +786,12 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "studios_created_by_fk"
-            columns: ["created_by"]
+            foreignKeyName: 'studios_created_by_fk'
+            columns: ['created_by']
             isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          }
         ]
       }
     }
@@ -777,16 +804,16 @@ export type Database = {
     }
     Enums: {
       appointment_status:
-        | "requested"
-        | "confirmed"
-        | "checked_in"
-        | "completed"
-        | "cancelled"
-        | "no_show"
-      channel: "instagram" | "internal"
-      member_role: "admin" | "staff"
-      message_sender: "studio" | "customer" | "ai"
-      thread_status: "open" | "snoozed" | "closed"
+        | 'requested'
+        | 'confirmed'
+        | 'checked_in'
+        | 'completed'
+        | 'cancelled'
+        | 'no_show'
+      channel: 'instagram' | 'internal'
+      member_role: 'admin' | 'staff'
+      message_sender: 'studio' | 'customer' | 'ai'
+      thread_status: 'open' | 'snoozed' | 'closed'
     }
     CompositeTypes: {
       [_ in never]: never
@@ -794,138 +821,138 @@ export type Database = {
   }
 }
 
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+type DatabaseWithoutInternals = Omit<Database, '__InternalSupabase'>
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, 'public'>]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | keyof (DefaultSchema['Tables'] & DefaultSchema['Views'])
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])
+    : never = never
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema['Tables'] &
+      DefaultSchema['Views'])
+  ? (DefaultSchema['Tables'] &
+      DefaultSchema['Views'])[DefaultSchemaTableNameOrOptions] extends {
+      Row: infer R
+    }
+    ? R
     : never
+  : never
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
+    | keyof DefaultSchema['Tables']
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
+    : never = never
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
-      }
-      ? I
-      : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
+  ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
+      Insert: infer I
+    }
+    ? I
     : never
+  : never
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
+    | keyof DefaultSchema['Tables']
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
+    : never = never
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
+  ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
+      Update: infer U
+    }
+    ? U
     : never
+  : never
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
+    | keyof DefaultSchema['Enums']
     | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums']
+    : never = never
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums'][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema['Enums']
+  ? DefaultSchema['Enums'][DefaultSchemaEnumNameOrOptions]
+  : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
+    | keyof DefaultSchema['CompositeTypes']
     | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes']
+    : never = never
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes'][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema['CompositeTypes']
+  ? DefaultSchema['CompositeTypes'][PublicCompositeTypeNameOrOptions]
+  : never
 
 export const Constants = {
   public: {
     Enums: {
       appointment_status: [
-        "requested",
-        "confirmed",
-        "checked_in",
-        "completed",
-        "cancelled",
-        "no_show",
+        'requested',
+        'confirmed',
+        'checked_in',
+        'completed',
+        'cancelled',
+        'no_show',
       ],
-      channel: ["instagram", "internal"],
-      member_role: ["admin", "staff"],
-      message_sender: ["studio", "customer", "ai"],
-      thread_status: ["open", "snoozed", "closed"],
+      channel: ['instagram', 'internal'],
+      member_role: ['admin', 'staff'],
+      message_sender: ['studio', 'customer', 'ai'],
+      thread_status: ['open', 'snoozed', 'closed'],
     },
   },
 } as const
