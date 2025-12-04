@@ -12,6 +12,16 @@ interface SendMessageBody {
 // POST /api/instagram/send - Nachricht an Instagram User senden
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createServerClient()
+
+    // Auth check - only admins can send messages
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body: SendMessageBody = await request.json()
 
     if (!body.instagram_id || !body.message) {
@@ -49,7 +59,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Speichere in Supabase
-    const supabase = await createServerClient()
     const { data, error } = await supabase
       .from('instagram_messages')
       .insert({

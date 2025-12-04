@@ -23,6 +23,14 @@ export async function GET() {
   try {
     const supabase = await createServerClient()
 
+    // Auth check - only admins can access
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     // Alle Messages holen, nach Datum sortiert
     const { data: messages, error } = await supabase
       .from('instagram_messages')
