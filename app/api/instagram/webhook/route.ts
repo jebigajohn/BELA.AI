@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyHubSignature, sendInstagramReply } from '@/lib/instagram/client'
 import { createServerClient } from '@/lib/supabase/server'
 import { generateDMResponse } from '@/lib/ai/dm-generator'
+import type { Json } from '@/database.types'
 
 // Removed 'edge' runtime - Supabase server client is not Edge-compatible
 
@@ -55,7 +56,7 @@ export async function POST(request: NextRequest) {
     // - "messaging" array directly on entry
     for (const entry of body.entry || []) {
       console.log('📬 Processing entry:', JSON.stringify(entry, null, 2))
-      
+
       // Handle "changes" structure (Instagram API)
       for (const change of entry.changes || []) {
         console.log('🔄 Processing change:', change.field)
@@ -66,21 +67,21 @@ export async function POST(request: NextRequest) {
         if (change.field === 'messages' && value.message) {
           const fromId = value.sender?.id || 'unknown'
           const text = value.message?.text || ''
-          
+
           console.log(`💬 Message from ${fromId}: ${text}`)
-          
+
           // Store incoming message
           await storeAndReply(fromId, text, value)
         }
       }
-      
+
       // Handle "messaging" structure (Messenger-style)
       for (const msg of entry.messaging || []) {
         const fromId = msg.sender?.id || msg.from || 'unknown'
         const text = msg.message?.text || msg.text || ''
-        
+
         console.log(`💬 Messaging from ${fromId}: ${text}`)
-        
+
         // Store incoming message
         await storeAndReply(fromId, text, msg)
       }
@@ -94,12 +95,12 @@ export async function POST(request: NextRequest) {
 }
 
 // Helper function to store message and send AI reply
-async function storeAndReply(fromId: string, text: string, rawMsg: unknown) {
+async function storeAndReply(fromId: string, text: string, rawMsg: Json) {
   if (!text) {
     console.log('⚠️ Empty message, skipping')
     return
   }
-  
+
   // Store incoming message in Supabase
   try {
     const supabase = await createServerClient()
@@ -124,7 +125,7 @@ async function storeAndReply(fromId: string, text: string, rawMsg: unknown) {
     const replyText =
       (ai as any).answer || (ai as any).response || JSON.stringify(ai)
     console.log('🤖 AI response:', replyText)
-    
+
     // Send reply to Instagram
     await sendInstagramReply(fromId, replyText)
     console.log('📤 Reply sent to Instagram')
@@ -136,7 +137,7 @@ async function storeAndReply(fromId: string, text: string, rawMsg: unknown) {
         instagram_id: fromId,
         direction: 'outbound',
         body: replyText,
-        raw: ai,
+        raw: ai as Json,
       })
       console.log('✅ Outbound message stored')
     } catch (e) {
