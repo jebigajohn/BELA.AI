@@ -41,6 +41,7 @@ const navItems: NavItem[] = [
     href: '/demo/ai-dm',
     label: 'AI DM Demo',
     icon: <Sparkles size={20} />,
+    adminOnly: true,
   },
   {
     href: '/admin/staff',
