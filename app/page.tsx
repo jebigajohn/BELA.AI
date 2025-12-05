@@ -16,7 +16,7 @@ const fallbackImages = [
 const studioData = {
   name: '23 Nailroom Bali',
   rating: 4.9,
-  reviewCount: 127,
+  reviewCount: 209,
   address: 'Jl. Pantai Batu Bolong No.23, Canggu',
   googleMapsUrl: 'https://maps.google.com/?q=23+Nailroom+Bali+Canggu',
   openingHours: {
