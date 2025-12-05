@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
           console.log(`💬 Message from ${fromId}: ${text}`)
 
           // Store incoming message
-          await storeAndReply(fromId, text, value)
+          await storeMessage(fromId, text, 'inbound', value)
         }
       }
 

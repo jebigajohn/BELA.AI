@@ -10,7 +10,7 @@ export const dmResponseSchema = z.object({
   answer: z.string().describe('Die freundliche Antwort an den Kunden'),
 })
 
-// Für Abwärtskompatibilität - exportieren wir auch die alten Typen
+// Für Abwärtskompatibilität - exportieren wir auch die alten Schemas
 export const directAnswerSchema = dmResponseSchema
 export const detailedAnswerSchema = dmResponseSchema
 export const quickReplySchema = dmResponseSchema
@@ -25,9 +25,4 @@ export type DMResponse = z.infer<typeof dmResponseSchema>
 export type DirectAnswer = DMResponse
 export type DetailedAnswer = DMResponse
 export type QuickReply = DMResponse
-export type MultipleResponses = z.infer<typeof multipleResponsesSchema>
-export type DirectAnswer = z.infer<typeof directAnswerSchema>
-export type DetailedAnswer = z.infer<typeof detailedAnswerSchema>
-export type QuickReply = z.infer<typeof quickReplySchema>
-export type DMResponse = z.infer<typeof dmResponseSchema>
 export type MultipleResponses = z.infer<typeof multipleResponsesSchema>
