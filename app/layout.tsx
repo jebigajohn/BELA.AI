@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import Header from './components/Header.server'
 import ThemeToggle from './components/ThemeToggle'
+import Snowfall from './components/Snowfall'
 import { Providers } from './providers'
 
 const geistSans = Geist({
@@ -37,6 +38,7 @@ export default function RootLayout({
       >
         <Providers>
           <div className="min-h-screen">
+            <Snowfall />
             <Header />
             <main className="pt-16 bg-neutral-50 dark:bg-neutral-950 min-h-screen">
               {children}
