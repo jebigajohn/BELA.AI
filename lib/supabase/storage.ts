@@ -1,17 +1,23 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+// Lazy-init admin client to avoid build-time errors
+let _supabaseAdmin: SupabaseClient | null = null
 
-// Create a service role client for server-side operations
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: { persistSession: false },
-})
+function getSupabaseAdmin(): SupabaseClient {
+  if (!_supabaseAdmin) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+    _supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+      auth: { persistSession: false },
+    })
+  }
+  return _supabaseAdmin
+}
 
 // Hole die gespeicherte Reihenfolge für einen Bucket aus der Datenbank
 async function getStoredOrder(bucket: string): Promise<string[]> {
   try {
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await getSupabaseAdmin()
       .from('storage_order')
       .select('file_order')
       .eq('bucket', bucket)
@@ -55,6 +61,7 @@ function sortByOrder(
 
 export async function getHeroPhotos(): Promise<string[]> {
   try {
+    const supabaseAdmin = getSupabaseAdmin()
     const { data, error } = await supabaseAdmin.storage
       .from('hero-photos')
       .list('', {
@@ -93,6 +100,7 @@ export async function getHeroPhotos(): Promise<string[]> {
 
 export async function getNailInspoPhotos(): Promise<string[]> {
   try {
+    const supabaseAdmin = getSupabaseAdmin()
     const { data, error } = await supabaseAdmin.storage
       .from('nail-inspo')
       .list('', {
@@ -127,6 +135,7 @@ export async function getNailInspoPhotos(): Promise<string[]> {
 
 export async function getStaffPhotos(): Promise<string[]> {
   try {
+    const supabaseAdmin = getSupabaseAdmin()
     const { data, error } = await supabaseAdmin.storage
       .from('staff-photos')
       .list('', {
