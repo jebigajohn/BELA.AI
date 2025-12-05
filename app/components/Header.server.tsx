@@ -17,21 +17,28 @@ export default async function Header() {
 
     // Check if user is admin - use admin client to bypass RLS
     if (user) {
-      const { data: membership, error: membershipError } = await getSupabaseAdmin()
-        .from('studio_members')
-        .select('role')
-        .eq('profile_id', user.id)
-        .single()
+      try {
+        const { data: membership, error: membershipError } =
+          await getSupabaseAdmin()
+            .from('studio_members')
+            .select('role')
+            .eq('profile_id', user.id)
+            .single()
 
-      if (membershipError) {
-        console.warn('studio_members query error:', membershipError.message)
+        if (membershipError) {
+          console.error(
+            'Header.server - studio_members query error:',
+            membershipError.message
+          )
+        } else {
+          console.log('Header.server - User ID:', user.id)
+          console.log('Header.server - Membership:', membership)
+          console.log('Header.server - isAdmin:', membership?.role === 'admin')
+          isAdmin = membership?.role === 'admin'
+        }
+      } catch (adminError) {
+        console.error('Header.server - Admin client error:', adminError)
       }
-
-      console.log('Header.server - User ID:', user.id)
-      console.log('Header.server - Membership:', membership)
-      console.log('Header.server - isAdmin:', membership?.role === 'admin')
-
-      isAdmin = membership?.role === 'admin'
     }
   } catch (error) {
     console.warn('Supabase auth.getUser failed, ignoring', error)
