@@ -21,7 +21,10 @@ export default function HeaderNav({ isLoggedIn, profile }: HeaderNavProps) {
   // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setDropdownOpen(false)
       }
     }
@@ -71,9 +74,11 @@ export default function HeaderNav({ isLoggedIn, profile }: HeaderNavProps) {
                     )}
                   </div>
                   {/* Chevron */}
-                  <ChevronDown 
-                    size={18} 
-                    className={`text-neutral-600 dark:text-neutral-400 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} 
+                  <ChevronDown
+                    size={18}
+                    className={`text-neutral-600 dark:text-neutral-400 transition-transform ${
+                      dropdownOpen ? 'rotate-180' : ''
+                    }`}
                   />
                 </button>
 

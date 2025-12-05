@@ -6,9 +6,11 @@ export default async function Header() {
   noStore()
   const supabase = await createServerClient()
   let user = null
-  
+
   try {
-    const { data: { user: authUser } } = await supabase.auth.getUser()
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser()
     user = authUser
   } catch (error) {
     console.warn('Supabase auth.getUser failed, ignoring', error)

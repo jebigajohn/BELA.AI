@@ -35,25 +35,40 @@ export default function StudioInfo({
         {/* Rating */}
         <div className="flex items-center gap-1.5 bg-neutral-100 dark:bg-neutral-800 px-3 py-1.5 rounded-full">
           <span className="text-yellow-500">★</span>
-          <span className="font-semibold text-neutral-900 dark:text-white">{rating.toFixed(1)}</span>
+          <span className="font-semibold text-neutral-900 dark:text-white">
+            {rating.toFixed(1)}
+          </span>
           <span className="text-neutral-500">({reviewCount})</span>
         </div>
 
         {/* Open/Closed Status */}
         <div className="flex items-center gap-1.5 bg-neutral-100 dark:bg-neutral-800 px-3 py-1.5 rounded-full">
-          <Clock size={14} className={openingHours.isOpen ? 'text-green-500' : 'text-red-500'} />
+          <Clock
+            size={14}
+            className={openingHours.isOpen ? 'text-green-500' : 'text-red-500'}
+          />
           {openingHours.isOpen ? (
             <span>
-              <span className="text-green-600 dark:text-green-400 font-medium">Geöffnet</span>
+              <span className="text-green-600 dark:text-green-400 font-medium">
+                Geöffnet
+              </span>
               {openingHours.closesAt && (
-                <span className="text-neutral-500"> – schließt um {openingHours.closesAt}</span>
+                <span className="text-neutral-500">
+                  {' '}
+                  – schließt um {openingHours.closesAt}
+                </span>
               )}
             </span>
           ) : (
             <span>
-              <span className="text-red-600 dark:text-red-400 font-medium">Geschlossen</span>
+              <span className="text-red-600 dark:text-red-400 font-medium">
+                Geschlossen
+              </span>
               {openingHours.opensAt && (
-                <span className="text-neutral-500"> – öffnet um {openingHours.opensAt}</span>
+                <span className="text-neutral-500">
+                  {' '}
+                  – öffnet um {openingHours.opensAt}
+                </span>
               )}
             </span>
           )}
@@ -62,7 +77,9 @@ export default function StudioInfo({
         {/* Address */}
         <div className="flex items-center gap-1.5 bg-neutral-100 dark:bg-neutral-800 px-3 py-1.5 rounded-full">
           <MapPin size={14} className="text-neutral-500" />
-          <span className="text-neutral-700 dark:text-neutral-300 text-sm">{address}</span>
+          <span className="text-neutral-700 dark:text-neutral-300 text-sm">
+            {address}
+          </span>
         </div>
 
         {/* Route Button */}
