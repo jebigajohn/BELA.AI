@@ -1,14 +1,7 @@
 import { createServerClient } from '@/lib/supabase/server'
-import { createClient } from '@supabase/supabase-js'
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { unstable_noStore as noStore } from 'next/cache'
 import HeaderNav from './HeaderNav'
-
-// Admin client that bypasses RLS
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { persistSession: false } }
-)
 
 export default async function Header() {
   noStore()
@@ -24,7 +17,7 @@ export default async function Header() {
 
     // Check if user is admin - use admin client to bypass RLS
     if (user) {
-      const { data: membership, error: membershipError } = await supabaseAdmin
+      const { data: membership, error: membershipError } = await getSupabaseAdmin()
         .from('studio_members')
         .select('role')
         .eq('profile_id', user.id)

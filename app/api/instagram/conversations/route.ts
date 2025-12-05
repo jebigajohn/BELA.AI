@@ -1,13 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase/server'
-import { createClient } from '@supabase/supabase-js'
-
-// Admin client that bypasses RLS
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { persistSession: false } }
-)
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 
 export interface Conversation {
   instagram_id: string
@@ -40,7 +33,7 @@ export async function GET() {
     }
 
     // Check admin status using admin client
-    const { data: membership } = await supabaseAdmin
+    const { data: membership } = await getSupabaseAdmin()
       .from('studio_members')
       .select('role')
       .eq('profile_id', user.id)
@@ -51,7 +44,7 @@ export async function GET() {
     }
 
     // Alle Messages holen, nach Datum sortiert - use admin client
-    const { data: messages, error } = await supabaseAdmin
+    const { data: messages, error } = await getSupabaseAdmin()
       .from('instagram_messages')
       .select('*')
       .order('created_at', { ascending: true })

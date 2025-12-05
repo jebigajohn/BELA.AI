@@ -1,14 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyHubSignature } from '@/lib/instagram/client'
-import { createClient } from '@supabase/supabase-js'
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import type { Json } from '@/database.types'
-
-// Admin client that bypasses RLS - wichtig für Webhook ohne Auth
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { persistSession: false } }
-)
 
 // GET for webhook verification
 export async function GET(request: NextRequest) {
@@ -132,7 +125,7 @@ async function storeMessage(
 
   // Store message in Supabase using admin client (bypasses RLS)
   try {
-    const { error } = await supabaseAdmin.from('instagram_messages').insert({
+    const { error } = await getSupabaseAdmin().from('instagram_messages').insert({
       instagram_id: customerId, // Immer die Kunden-ID, nicht unsere!
       direction: direction,
       body: text,

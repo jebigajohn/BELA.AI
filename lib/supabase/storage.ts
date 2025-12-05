@@ -62,7 +62,7 @@ function sortByOrder(
 export async function getHeroPhotos(): Promise<string[]> {
   try {
     const supabaseAdmin = getSupabaseAdmin()
-    const { data, error } = await supabaseAdmin.storage
+    const { data, error } = await getSupabaseAdmin().storage
       .from('hero-photos')
       .list('', {
         limit: 50,
@@ -101,7 +101,7 @@ export async function getHeroPhotos(): Promise<string[]> {
 export async function getNailInspoPhotos(): Promise<string[]> {
   try {
     const supabaseAdmin = getSupabaseAdmin()
-    const { data, error } = await supabaseAdmin.storage
+    const { data, error } = await getSupabaseAdmin().storage
       .from('nail-inspo')
       .list('', {
         limit: 20,
@@ -136,7 +136,7 @@ export async function getNailInspoPhotos(): Promise<string[]> {
 export async function getStaffPhotos(): Promise<string[]> {
   try {
     const supabaseAdmin = getSupabaseAdmin()
-    const { data, error } = await supabaseAdmin.storage
+    const { data, error } = await getSupabaseAdmin().storage
       .from('staff-photos')
       .list('', {
         limit: 10,

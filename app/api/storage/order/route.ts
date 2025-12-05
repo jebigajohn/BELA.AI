@@ -1,18 +1,6 @@
-import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@/lib/supabase/server'
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { NextRequest, NextResponse } from 'next/server'
-
-// Service Role Client für Admin-Operationen
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  }
-)
 
 // Admin-Check Helper
 async function isAdmin(): Promise<boolean> {
@@ -24,7 +12,7 @@ async function isAdmin(): Promise<boolean> {
     if (!user) return false
 
     // Use admin client to bypass RLS
-    const { data: membership } = await supabaseAdmin
+    const { data: membership } = await getSupabaseAdmin()
       .from('studio_members')
       .select('role')
       .eq('profile_id', user.id)
@@ -54,7 +42,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Speichere die Reihenfolge in der Datenbank (upsert)
-    const { error: upsertError } = await supabaseAdmin
+    const { error: upsertError } = await getSupabaseAdmin()
       .from('storage_order')
       .upsert(
         {
@@ -94,7 +82,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Hole die Order aus der Datenbank
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await getSupabaseAdmin()
       .from('storage_order')
       .select('file_order')
       .eq('bucket', bucket)

@@ -1,14 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase/server'
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-
-// Admin client with service role for storage operations
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: { persistSession: false },
-})
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 
 const ALLOWED_BUCKETS = [
   'hero-photos',
@@ -33,7 +25,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { data: membership } = await supabaseAdmin
+    const { data: membership } = await getSupabaseAdmin()
       .from('studio_members')
       .select('role')
       .eq('profile_id', user.id)
@@ -72,7 +64,7 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(arrayBuffer)
 
     // Upload with service role (bypasses RLS)
-    const { data, error } = await supabaseAdmin.storage
+    const { data, error } = await getSupabaseAdmin().storage
       .from(bucket)
       .upload(filename, buffer, {
         contentType: file.type,
@@ -86,7 +78,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get public URL
-    const { data: urlData } = supabaseAdmin.storage
+    const { data: urlData } = getSupabaseAdmin().storage
       .from(bucket)
       .getPublicUrl(filename)
 
@@ -116,7 +108,7 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    const { data: membership } = await supabaseAdmin
+    const { data: membership } = await getSupabaseAdmin()
       .from('studio_members')
       .select('role')
       .eq('profile_id', user.id)
@@ -137,7 +129,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Delete with service role
-    const { error } = await supabaseAdmin.storage
+    const { error } = await getSupabaseAdmin().storage
       .from(bucket)
       .remove([filename])
 
@@ -168,7 +160,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const { data: membership } = await supabaseAdmin
+    const { data: membership } = await getSupabaseAdmin()
       .from('studio_members')
       .select('role')
       .eq('profile_id', user.id)
@@ -186,7 +178,7 @@ export async function GET(request: NextRequest) {
     }
 
     // List files with service role
-    const { data, error } = await supabaseAdmin.storage.from(bucket).list('', {
+    const { data, error } = await getSupabaseAdmin().storage.from(bucket).list('', {
       limit: 100,
       sortBy: { column: 'created_at', order: 'desc' },
     })
@@ -203,7 +195,7 @@ export async function GET(request: NextRequest) {
       )
       .map((f) => ({
         name: f.name,
-        url: supabaseAdmin.storage.from(bucket).getPublicUrl(f.name).data
+        url: getSupabaseAdmin().storage.from(bucket).getPublicUrl(f.name).data
           .publicUrl,
         size: f.metadata?.size || 0,
         createdAt: f.created_at || '',
@@ -212,7 +204,7 @@ export async function GET(request: NextRequest) {
     // Check for stored order in database
     let files = allFiles
     try {
-      const { data: orderData } = await supabaseAdmin
+      const { data: orderData } = await getSupabaseAdmin()
         .from('storage_order')
         .select('file_order')
         .eq('bucket', bucket)

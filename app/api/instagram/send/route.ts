@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
 
     // Check admin status
     const supabaseAdmin = getSupabaseAdmin()
-    const { data: membership, error: membershipError } = await supabaseAdmin
+    const { data: membership, error: membershipError } = await getSupabaseAdmin()
       .from('studio_members')
       .select('role')
       .eq('profile_id', user.id)
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
         console.log('🤖 Generating AI response...')
 
         // Lade Chat-Historie für Kontext
-        const { data: messages } = await supabaseAdmin
+        const { data: messages } = await getSupabaseAdmin()
           .from('instagram_messages')
           .select('direction, body')
           .eq('instagram_id', body.instagram_id)
@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
 
     // Speichere in Supabase mit Admin-Client (umgeht RLS)
     try {
-      const { data, error } = await supabaseAdmin
+      const { data, error } = await getSupabaseAdmin()
         .from('instagram_messages')
         .insert({
           instagram_id: body.instagram_id,

@@ -1,13 +1,6 @@
 import { createServerClient } from '@/lib/supabase/server'
-import { createClient } from '@supabase/supabase-js'
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import ServicesClient from './ServicesClient'
-
-// Admin client that bypasses RLS for reading data
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { persistSession: false } }
-)
 
 type Service = {
   id: string
@@ -25,7 +18,7 @@ export default async function ServicesPage() {
   // Studio-Auswahl: Wenn eingeloggt, nutze default_studio_id, sonst fallback auf Slug
   let studioId: string | null = null
   if (user) {
-    const { data: profile } = await supabaseAdmin
+    const { data: profile } = await getSupabaseAdmin()
       .from('profiles')
       .select('default_studio_id')
       .eq('id', user.id)
@@ -35,7 +28,7 @@ export default async function ServicesPage() {
     }
   }
   if (!studioId) {
-    const { data: studio } = await supabaseAdmin
+    const { data: studio } = await getSupabaseAdmin()
       .from('studios')
       .select('id')
       .eq('slug', '23-nailroom-bali')
@@ -43,7 +36,7 @@ export default async function ServicesPage() {
     studioId = studio?.id ?? null
   }
 
-  const { data: services, error } = await supabaseAdmin
+  const { data: services, error } = await getSupabaseAdmin()
     .from('services')
     .select('id, name, price_cents, duration_min')
     .eq('studio_id', studioId as string)

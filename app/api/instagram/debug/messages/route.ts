@@ -1,13 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase/server'
-import { createClient } from '@supabase/supabase-js'
-
-// Admin client that bypasses RLS
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { persistSession: false } }
-)
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 
 // GET - Debug: Zeige alle Messages in der DB
 export async function GET() {
@@ -22,7 +15,7 @@ export async function GET() {
     }
 
     // Check admin
-    const { data: membership } = await supabaseAdmin
+    const { data: membership } = await getSupabaseAdmin()
       .from('studio_members')
       .select('role')
       .eq('profile_id', user.id)
@@ -33,7 +26,7 @@ export async function GET() {
     }
 
     // Hole alle Messages
-    const { data: messages, error } = await supabaseAdmin
+    const { data: messages, error } = await getSupabaseAdmin()
       .from('instagram_messages')
       .select('id, instagram_id, direction, body, created_at')
       .order('created_at', { ascending: false })
@@ -84,7 +77,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Check admin
-    const { data: membership } = await supabaseAdmin
+    const { data: membership } = await getSupabaseAdmin()
       .from('studio_members')
       .select('role')
       .eq('profile_id', user.id)
@@ -99,7 +92,7 @@ export async function DELETE(request: NextRequest) {
 
     if (instagramId) {
       // Lösche nur Messages für diese instagram_id
-      const { error } = await supabaseAdmin
+      const { error } = await getSupabaseAdmin()
         .from('instagram_messages')
         .delete()
         .eq('instagram_id', instagramId)
@@ -114,7 +107,7 @@ export async function DELETE(request: NextRequest) {
       })
     } else {
       // Lösche ALLE Messages
-      const { error } = await supabaseAdmin
+      const { error } = await getSupabaseAdmin()
         .from('instagram_messages')
         .delete()
         .neq('id', 0) // Trick um alle zu löschen
