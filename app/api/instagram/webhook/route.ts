@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyHubSignature, sendInstagramReply } from '@/lib/instagram/client'
-import { createServerClient } from '@/lib/supabase/server'
-import { generateDMResponse } from '@/lib/ai/dm-generator'
+import { verifyHubSignature } from '@/lib/instagram/client'
+import { createClient } from '@supabase/supabase-js'
 import type { Json } from '@/database.types'
 
-// Removed 'edge' runtime - Supabase server client is not Edge-compatible
+// Admin client that bypasses RLS - wichtig für Webhook ohne Auth
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  { auth: { persistSession: false } }
+)
 
 // GET for webhook verification
 export async function GET(request: NextRequest) {
@@ -75,15 +79,33 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Handle "messaging" structure (Messenger-style)
+      // Handle "messaging" structure (Messenger-style / Instagram DM API)
       for (const msg of entry.messaging || []) {
-        const fromId = msg.sender?.id || msg.from || 'unknown'
-        const text = msg.message?.text || msg.text || ''
+        const senderId = msg.sender?.id
+        const recipientId = msg.recipient?.id
+        const text = msg.message?.text || ''
+        const isEcho = msg.message?.is_echo === true
 
-        console.log(`💬 Messaging from ${fromId}: ${text}`)
+        console.log(`💬 Messaging:`)
+        console.log(`   - Sender ID: ${senderId}`)
+        console.log(`   - Recipient ID: ${recipientId}`)
+        console.log(`   - Is Echo: ${isEcho}`)
+        console.log(`   - Text: ${text}`)
 
-        // Store incoming message
-        await storeAndReply(fromId, text, msg)
+        const myBusinessId = process.env.INSTAGRAM_USER_ID
+
+        if (isEcho) {
+          // Echo = Nachricht die WIR gesendet haben
+          // sender = unser Business Account, recipient = der Kunde
+          console.log(`📤 Echo (outbound) to customer: ${recipientId}`)
+          await storeMessage(recipientId!, text, 'outbound', msg)
+        } else if (senderId && senderId !== myBusinessId) {
+          // Eingehende Nachricht von einem Kunden
+          console.log(`📥 Inbound from customer: ${senderId}`)
+          await storeMessage(senderId, text, 'inbound', msg)
+        } else {
+          console.log(`⚠️ Skipping message - sender is our business account`)
+        }
       }
     }
 
@@ -94,58 +116,34 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Helper function to store message (auto-reply disabled)
-async function storeAndReply(fromId: string, text: string, rawMsg: Json) {
+// Helper function to store message
+async function storeMessage(
+  customerId: string,
+  text: string,
+  direction: 'inbound' | 'outbound',
+  rawMsg: Json
+) {
   if (!text) {
     console.log('⚠️ Empty message, skipping')
     return
   }
 
-  // Store incoming message in Supabase
+  console.log(`💾 Storing ${direction} message for customer: ${customerId}`)
+
+  // Store message in Supabase using admin client (bypasses RLS)
   try {
-    const supabase = await createServerClient()
-    const { error } = await supabase.from('instagram_messages').insert({
-      instagram_id: fromId,
-      direction: 'inbound',
+    const { error } = await supabaseAdmin.from('instagram_messages').insert({
+      instagram_id: customerId, // Immer die Kunden-ID, nicht unsere!
+      direction: direction,
       body: text,
       raw: rawMsg,
     })
     if (error) {
       console.error('❌ Supabase insert error:', error)
     } else {
-      console.log('✅ Message stored in Supabase')
+      console.log(`✅ ${direction} message stored for customer: ${customerId}`)
     }
   } catch (e) {
     console.error('❌ Supabase insert failed', e)
   }
-
-  // AUTO-REPLY DISABLED - uncomment to enable AI responses
-  /*
-  try {
-    const ai = await generateDMResponse(text)
-    const replyText =
-      (ai as any).answer || (ai as any).response || JSON.stringify(ai)
-    console.log('🤖 AI response:', replyText)
-
-    // Send reply to Instagram
-    await sendInstagramReply(fromId, replyText)
-    console.log('📤 Reply sent to Instagram')
-
-    // Store outbound message
-    try {
-      const supabase = await createServerClient()
-      await supabase.from('instagram_messages').insert({
-        instagram_id: fromId,
-        direction: 'outbound',
-        body: replyText,
-        raw: ai as Json,
-      })
-      console.log('✅ Outbound message stored')
-    } catch (e) {
-      console.error('❌ Outbound store failed', e)
-    }
-  } catch (e) {
-    console.error('❌ AI reply/send failed', e)
-  }
-  */
 }

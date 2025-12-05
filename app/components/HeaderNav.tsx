@@ -3,7 +3,15 @@
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { User, Calendar, Settings, LogOut, ChevronDown } from 'lucide-react'
+import {
+  User,
+  Calendar,
+  Settings,
+  LogOut,
+  ChevronDown,
+  Sparkles,
+  ImageIcon,
+} from 'lucide-react'
 
 interface HeaderNavProps {
   isLoggedIn: boolean
@@ -12,9 +20,14 @@ interface HeaderNavProps {
     email: string
     avatarUrl?: string
   } | null
+  isAdmin?: boolean
 }
 
-export default function HeaderNav({ isLoggedIn, profile }: HeaderNavProps) {
+export default function HeaderNav({
+  isLoggedIn,
+  profile,
+  isAdmin,
+}: HeaderNavProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -43,7 +56,7 @@ export default function HeaderNav({ isLoggedIn, profile }: HeaderNavProps) {
               alt="BellaAI"
               width={120}
               height={32}
-              className="h-8 w-auto"
+              className="h-16 w-auto"
               priority
             />
           </Link>
@@ -113,6 +126,26 @@ export default function HeaderNav({ isLoggedIn, profile }: HeaderNavProps) {
                         <Calendar size={18} />
                         <span>Termine</span>
                       </Link>
+                      {isAdmin && (
+                        <Link
+                          href="/demo/ai-dm"
+                          onClick={() => setDropdownOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+                        >
+                          <Sparkles size={18} className="text-purple-500" />
+                          <span>AI DMs</span>
+                        </Link>
+                      )}
+                      {isAdmin && (
+                        <Link
+                          href="/admin/images"
+                          onClick={() => setDropdownOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+                        >
+                          <ImageIcon size={18} className="text-green-500" />
+                          <span>Bilder</span>
+                        </Link>
+                      )}
                       <Link
                         href="/settings"
                         onClick={() => setDropdownOpen(false)}

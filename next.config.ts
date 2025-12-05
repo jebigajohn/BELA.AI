@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'cdn-gatekeeper-uploads.fresha.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'cncqiabrkazknvxxjfms.supabase.co',
+      },
     ],
   },
 }

@@ -9,6 +9,11 @@ import {
 
 // Stelle sicher, dass GOOGLE_GENERATIVE_AI_API_KEY in .env.local gesetzt ist
 
+export interface ChatMessage {
+  direction: 'inbound' | 'outbound'
+  body: string
+}
+
 /**
  * Generiert eine strukturierte Antwort auf eine Instagram DM
  */
@@ -18,7 +23,8 @@ export async function generateDMResponse(
     name?: string
     services?: string[]
     location?: string
-  }
+  },
+  chatHistory?: ChatMessage[]
 ): Promise<DMResponse> {
   const context = studioContext
     ? `
@@ -29,6 +35,23 @@ Studio Info:
 `
     : ''
 
+  // Format chat history for context
+  let historyContext = ''
+  if (chatHistory && chatHistory.length > 0) {
+    historyContext = `
+Previous conversation:
+${chatHistory
+  .map(
+    (msg) => `${msg.direction === 'inbound' ? 'Customer' : 'You'}: ${msg.body}`
+  )
+  .join('\n')}
+
+---
+`
+  }
+
+  const isFirstMessage = !chatHistory || chatHistory.length === 0
+
   const disableStructured =
     String(process.env.DISABLE_STRUCTURED_OUTPUTS || 'false').toLowerCase() ===
     'true'
@@ -38,19 +61,38 @@ Studio Info:
       const { object } = await generateObject({
         model: google('gemini-2.5-flash'),
         schema: dmResponseSchema,
-        prompt: `Du bist ein freundlicher Kundenservice-Assistent für ein Nagelstudio.
+        prompt: `You are the friendly Instagram customer service for "23 Nailroom", a nail studio in Bali.
 ${context}
+${historyContext}
+Customer's latest message: "${customerMessage}"
 
-Analysiere die folgende Kundenanfrage und erstelle eine passende Antwort:
+Your communication style:
+${
+  isFirstMessage
+    ? '- Start with a friendly greeting (e.g. "Hi there! 🌺" or "Hey! 💅🏻")'
+    : '- DO NOT greet again if you already greeted in the conversation above'
+}
+${
+  isFirstMessage
+    ? '- Thank them for reaching out'
+    : '- Continue the conversation naturally'
+}
+- Be warm and use fitting emojis (🌺💅🏻✨💗🪭👱🏼‍♀️)
+- Ask follow-up questions if needed (e.g. "with or without gel?")
+- Mention Happy Hour: 10% off when booking 10am-12pm via Fresha
+- Link to price list: https://linktr.ee/23nailroombali
+- End with "Love, 23 Nailroom"
 
-Kundenanfrage: "${customerMessage}"
-
-Wähle das passende Format:
-- "direct": Für einfache Fragen (z.B. Öffnungszeiten, Preise)
-- "detailed": Für komplexere Anfragen mit mehreren Optionen
-- "quick-reply": Für Fragen, die mit Quick-Reply-Buttons beantwortet werden können
-
-Antworte auf Deutsch, freundlich und professionell. Nutze Emojis sparsam.`,
+IMPORTANT:
+- Reply in ENGLISH
+- Max 800 characters
+- ${
+          isFirstMessage
+            ? 'This is the first message - greet them!'
+            : 'This is a follow-up message - DO NOT say "Hi there" or "Thanks for reaching out" again!'
+        }
+- Answer their question directly based on the conversation context
+- Return ONLY the "answer" field with your response text`,
       })
 
       return object
@@ -61,22 +103,44 @@ Antworte auf Deutsch, freundlich und professionell. Nutze Emojis sparsam.`,
   }
 
   // Fallback: use plain text generation when structured outputs fail or disabled
-  const prompt = `Du bist ein freundlicher Kundenservice-Assistent für ein Nagelstudio.\n${context}\n\nBeantworte die Kundenanfrage:\n${customerMessage}\n\nAntworte auf Deutsch, freundlich und professionell.`
+  const prompt = `You are the friendly Instagram customer service for "23 Nailroom", a nail studio in Bali.
+${context}
+${historyContext}
+Customer's latest message: "${customerMessage}"
+
+Your communication style:
+${
+  isFirstMessage
+    ? '- Start with a friendly greeting (e.g. "Hi there! 🌺")'
+    : '- DO NOT greet again - continue the conversation naturally'
+}
+${
+  isFirstMessage
+    ? '- Thank them for reaching out'
+    : '- Answer their question directly'
+}
+- Be warm and use fitting emojis (🌺💅🏻✨💗🪭👱🏼‍♀️)
+- Mention Happy Hour: 10% off when booking 10am-12pm via Fresha
+- Link to price list: https://linktr.ee/23nailroombali
+- End with "Love, 23 Nailroom"
+
+IMPORTANT:
+- Reply in ENGLISH
+- Max 800 characters
+- ${
+    isFirstMessage
+      ? 'This is the first message!'
+      : 'This is a follow-up - NO greeting!'
+  }`
 
   const txt = await generateText({
     model: google('gemini-2.5-flash'),
     prompt,
   })
 
-  // Map text fallback into a valid DirectAnswer shape so the frontend can read `meta.category` safely
+  // Return simple answer object
   return {
-    format: 'direct',
     answer: txt.text ?? '',
-    meta: {
-      category: 'general',
-      topics: [],
-      suggestedAction: 'none',
-    },
   } as DMResponse
 }
 

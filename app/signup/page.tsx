@@ -32,7 +32,7 @@ export default function SignUpPage() {
         setMessage(
           'Bitte prüfe deine E-Mail, um die Registrierung zu bestätigen.'
         )
-        router.replace('/demo/services')
+        router.replace('/')
         router.refresh()
       }
     } catch (err: any) {

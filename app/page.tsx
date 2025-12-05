@@ -1,8 +1,18 @@
 import Link from 'next/link'
 import StudioInfo from '@/app/components/StudioInfo'
 import PhotoGallery from '@/app/components/PhotoGallery'
+import { getHeroPhotos } from '@/lib/supabase/storage'
 
-// Mock data - später aus der Datenbank
+// Fallback images wenn keine in Supabase
+const fallbackImages = [
+  'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&q=80',
+  'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=800&q=80',
+  'https://images.unsplash.com/photo-1519014816548-bf5fe059798b?w=800&q=80',
+  'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&q=80',
+  'https://images.unsplash.com/photo-1457972729786-0411a3b2b626?w=800&q=80',
+]
+
+// Studio data - später aus der Datenbank
 const studioData = {
   name: '23 Nailroom Bali',
   rating: 4.9,
@@ -13,16 +23,13 @@ const studioData = {
     isOpen: true,
     closesAt: '20:00',
   },
-  images: [
-    'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&q=80',
-    'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=800&q=80',
-    'https://images.unsplash.com/photo-1519014816548-bf5fe059798b?w=800&q=80',
-    'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&q=80',
-    'https://images.unsplash.com/photo-1457972729786-0411a3b2b626?w=800&q=80',
-  ],
 }
 
-export default function Home() {
+export default async function Home() {
+  // Load hero photos from Supabase Storage
+  const heroPhotos = await getHeroPhotos()
+  const images = heroPhotos.length > 0 ? heroPhotos : fallbackImages
+
   return (
     <div className="min-h-screen bg-white dark:bg-neutral-950">
       {/* Main Content */}
@@ -39,10 +46,7 @@ export default function Home() {
 
         {/* Photo Gallery */}
         <div className="mt-8 relative">
-          <PhotoGallery
-            images={studioData.images}
-            studioName={studioData.name}
-          />
+          <PhotoGallery images={images} studioName={studioData.name} />
         </div>
 
         {/* Services Preview / CTA Section */}

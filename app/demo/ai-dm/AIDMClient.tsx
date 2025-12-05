@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Button } from '@/app/components/ui/button'
 import { Input } from '@/app/components/ui/input'
 import PageWrapper from '@/app/components/PageWrapper'
@@ -19,6 +19,8 @@ interface Conversation {
   last_message_at: string
   unread_count: number
   messages: Message[]
+  profile_pic?: string // Instagram Profilbild
+  username?: string // Instagram Username
 }
 
 export default function AIDMClient() {
@@ -28,12 +30,19 @@ export default function AIDMClient() {
   const [newMessage, setNewMessage] = useState('')
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
+  const [generatingAI, setGeneratingAI] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showMobileChat, setShowMobileChat] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const selectedIdRef = useRef<string | null>(null) // Stabile Referenz für selected ID
+
+  // Update ref when selection changes
+  useEffect(() => {
+    selectedIdRef.current = selectedConversation?.instagram_id || null
+  }, [selectedConversation?.instagram_id])
 
   // Lade Conversations
-  const fetchConversations = async () => {
+  const fetchConversations = useCallback(async () => {
     try {
       const res = await fetch('/api/instagram/conversations')
       const data = await res.json()
@@ -45,11 +54,11 @@ export default function AIDMClient() {
 
       setConversations(data.conversations || [])
 
-      // Update selected conversation if it exists
-      if (selectedConversation) {
+      // Update selected conversation if it exists - use ref for stable ID
+      const currentSelectedId = selectedIdRef.current
+      if (currentSelectedId) {
         const updated = data.conversations?.find(
-          (c: Conversation) =>
-            c.instagram_id === selectedConversation.instagram_id
+          (c: Conversation) => c.instagram_id === currentSelectedId
         )
         if (updated) {
           setSelectedConversation(updated)
@@ -60,7 +69,7 @@ export default function AIDMClient() {
     } finally {
       setLoading(false)
     }
-  }
+  }, []) // No dependencies - uses ref for stable ID
 
   useEffect(() => {
     fetchConversations()
@@ -77,16 +86,43 @@ export default function AIDMClient() {
 
   // Nachricht senden
   const handleSendMessage = async (useAI = false) => {
-    if (!selectedConversation || !newMessage.trim()) return
+    if (!selectedConversation) return
 
-    setSending(true)
+    // Speichere die aktuelle ID am Anfang der Funktion (stabil für die gesamte Operation)
+    const targetInstagramId = selectedConversation.instagram_id
+
+    // Für AI: Wenn kein Text eingegeben, nimm die letzte Kundennachricht
+    let messageToUse = newMessage.trim()
+
+    if (useAI && !messageToUse) {
+      // Finde die letzte inbound (Kunden-) Nachricht
+      const lastCustomerMessage = [...selectedConversation.messages]
+        .reverse()
+        .find((m) => m.direction === 'inbound')
+
+      if (lastCustomerMessage?.body) {
+        messageToUse = lastCustomerMessage.body
+      } else {
+        setError('Keine Kundennachricht gefunden für AI-Antwort')
+        return
+      }
+    }
+
+    if (!messageToUse) return
+
+    if (useAI) {
+      setGeneratingAI(true)
+    } else {
+      setSending(true)
+    }
+
     try {
       const res = await fetch('/api/instagram/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          instagram_id: selectedConversation.instagram_id,
-          message: newMessage,
+          instagram_id: targetInstagramId, // Verwende die gespeicherte ID
+          message: messageToUse,
           use_ai: useAI,
         }),
       })
@@ -99,12 +135,51 @@ export default function AIDMClient() {
       }
 
       setNewMessage('')
-      // Refresh conversations
-      await fetchConversations()
+
+      // Sofort die neue Nachricht zur UI hinzufügen (optimistic update)
+      // Verwende die gespeicherte targetInstagramId für alle Updates
+      if (data.message) {
+        const newMsg: Message = {
+          id: Date.now(), // Temporäre ID
+          instagram_id: targetInstagramId,
+          direction: 'outbound',
+          body: data.message,
+          created_at: new Date().toISOString(),
+        }
+
+        // Update nur wenn die aktuelle Selection noch die gleiche ist
+        setSelectedConversation((prev) => {
+          if (!prev || prev.instagram_id !== targetInstagramId) return prev
+          return {
+            ...prev,
+            messages: [...prev.messages, newMsg],
+            last_message: data.message,
+            last_message_at: newMsg.created_at,
+          }
+        })
+
+        // Auch in der Conversations-Liste aktualisieren - immer für die richtige ID
+        setConversations((prev) =>
+          prev.map((c) =>
+            c.instagram_id === targetInstagramId
+              ? {
+                  ...c,
+                  messages: [...c.messages, newMsg],
+                  last_message: data.message,
+                  last_message_at: newMsg.created_at,
+                }
+              : c
+          )
+        )
+      }
+
+      // Nach kurzer Verzögerung vom Server aktualisieren
+      setTimeout(fetchConversations, 1000)
     } catch {
       setError('Failed to send message')
     } finally {
       setSending(false)
+      setGeneratingAI(false)
     }
   }
 
@@ -157,6 +232,36 @@ export default function AIDMClient() {
     )
   }
 
+  // Reset alle Messages in der Datenbank
+  const handleResetMessages = async () => {
+    if (
+      !confirm(
+        'Alle gespeicherten Nachrichten löschen? Der Webhook wird neue Nachrichten sammeln.'
+      )
+    ) {
+      return
+    }
+
+    try {
+      const res = await fetch('/api/instagram/debug/messages', {
+        method: 'DELETE',
+      })
+      const data = await res.json()
+
+      if (data.error) {
+        setError(data.error)
+      } else {
+        setConversations([])
+        setSelectedConversation(null)
+        alert(
+          'Nachrichten gelöscht! Schicke eine neue DM um den Webhook zu testen.'
+        )
+      }
+    } catch {
+      setError('Reset fehlgeschlagen')
+    }
+  }
+
   return (
     <PageWrapper className="!p-2 md:!p-4">
       <div className="flex h-[calc(100vh-6rem)] bg-neutral-900 text-white rounded-lg overflow-hidden">
@@ -170,25 +275,46 @@ export default function AIDMClient() {
           <div className="p-4 border-b border-neutral-800">
             <div className="flex items-center justify-between">
               <h1 className="text-xl font-semibold">23nailroombali</h1>
-              <button
-                onClick={fetchConversations}
-                className="p-2 hover:bg-neutral-800 rounded-full transition-colors"
-                title="Aktualisieren"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={handleResetMessages}
+                  className="p-2 hover:bg-red-900/50 rounded-full transition-colors text-red-400"
+                  title="Alle Nachrichten löschen (Reset)"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                  />
-                </svg>
-              </button>
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    />
+                  </svg>
+                </button>
+                <button
+                  onClick={fetchConversations}
+                  className="p-2 hover:bg-neutral-800 rounded-full transition-colors"
+                  title="Aktualisieren"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
+                  </svg>
+                </button>
+              </div>
             </div>
             <p className="text-sm text-neutral-400 mt-1">Nachrichten</p>
           </div>
@@ -335,28 +461,35 @@ export default function AIDMClient() {
                         handleSendMessage(false)
                       }
                     }}
-                    disabled={sending}
+                    disabled={sending || generatingAI}
                   />
                   <Button
                     onClick={() => handleSendMessage(false)}
-                    disabled={sending || !newMessage.trim()}
+                    disabled={sending || generatingAI || !newMessage.trim()}
                     className="bg-blue-600 hover:bg-blue-700"
                   >
                     {sending ? '...' : 'Senden'}
                   </Button>
                   <Button
                     onClick={() => handleSendMessage(true)}
-                    disabled={sending || !newMessage.trim()}
+                    disabled={sending || generatingAI}
                     variant="outline"
-                    className="border-purple-500 text-purple-400 hover:bg-purple-500/10 hidden sm:flex"
-                    title="AI generiert Antwort basierend auf deinem Text"
+                    className="border-purple-500 text-purple-400 hover:bg-purple-500/10 hidden sm:flex items-center gap-2"
+                    title="AI generiert Antwort basierend auf letzter Kundennachricht"
                   >
-                    🤖 AI
+                    {generatingAI ? (
+                      <>
+                        <span className="animate-spin">⏳</span>
+                        Generiere...
+                      </>
+                    ) : (
+                      <>🤖 AI Antwort</>
+                    )}
                   </Button>
                 </div>
                 <p className="text-xs text-neutral-500 mt-2 hidden md:block">
-                  Enter = Senden | AI-Button = AI generiert Antwort basierend
-                  auf Kundenanfrage
+                  Enter = Senden | AI-Button = AI generiert automatische Antwort
+                  auf letzte Kundennachricht
                 </p>
               </div>
             </>
